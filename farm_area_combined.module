@@ -1,0 +1,87 @@
+<?php
+
+
+function farm_area_combined_help($path, $arg){
+	switch($path){
+		case "admin/help#farm_area_combined":
+			return t("Displays the area in alternative units. If you are using metric, it will display the imperial measurement, and the other way around.");
+			break;
+			
+	}
+}
+
+function farm_area_combined_menu(){
+	$items = array();
+
+    $items['admin/config/farm/area_combined'] = array(
+        'title' => 'Displayed Area Units',
+        'description' => 'Configures the combined area module - which shows both metric and imperial units for areas',
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('farm_area_combined_settings_form'),
+        'access arguments' => array('access administration pages'),
+        'type' => MENU_NORMAL_ITEM,
+        'access callback' => TRUE
+    );
+
+	return $items;
+}
+
+function farm_area_combined_settings_form($form, &$form_state){
+	$form ['farm_area_combined_settings'] = array(
+	'#type' => 'checkbox',
+	'#title' => t('Enable combined units?'),
+	'#description' => t('Enable combined units in the field map popups')
+	);
+	return system_settings_form($form);
+	
+}
+
+
+function farm_area_combined_farm_area_details($id){
+    $output = array();
+    $area_meters = farm_area_calculate_area($id,FALSE);
+    if (!empty($area_meters)){
+        $output_area = 0;
+        //Take the meters and see if they're big or small...
+        $size = farm_area_relative_size($area_meters);
+        //Get the units for that size
+        $units = farm_area_default_units('area',$size);
+        $converted_units = "";
+        $unit_style = '';
+        switch ($units){
+            case 'hectares':
+                $converted_units = 'acres';
+                $output_area = $area_meters / 4046.856;
+                $unit_style = 'Imperial';
+                break;
+
+            case 'square meters':
+                $converted_units = 'square feet';
+                $output_area = $area_meters * 10.764;
+                $unit_style = 'Imperial';
+                break;
+
+            case 'acres':
+                $converted_units = 'ha';
+                $output_area = $area_meters / 10000;
+                $unit_style = 'Metric';
+                break;
+
+            case 'square feet':
+                $converted_units = 'square meters';
+                $output_area = $area_meters;
+                $unit_style = 'Metric';
+                break;
+        }
+
+
+        $output_area = round($output_area,2);
+        $output['details']= array(
+            '#type' => 'markup',
+            '#markup' => '<small><p>'. $unit_style .' units:  '.$output_area. ' '. $converted_units .'</p></small>',
+            '#weight' => -98,
+        );
+    }
+
+    return $output;
+}

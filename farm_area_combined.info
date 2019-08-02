@@ -1,0 +1,8 @@
+name = Farm Area Combined Info
+description = Shows alternative units on the map details - If you are using metric, it will give you imperial measurements as well, and if you are using imperial, it will provide metric.
+core = 7.x
+dependencies[] = farm_area
+dependencies[] = options
+package = farmOS Contrib
+version = 7.x-0.1
+configure = admin/config/farm/area_combined
